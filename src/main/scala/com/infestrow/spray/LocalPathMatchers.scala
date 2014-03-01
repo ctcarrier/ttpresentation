@@ -1,4 +1,4 @@
-package com.blrest.spray
+package com.infestrow.spray
 
 import spray.routing._
 import scala.Some
@@ -8,7 +8,7 @@ import reactivemongo.bson.BSONObjectID
 /**
  * Created by ctcarrier on 1/7/14.
  */
-trait BlPathMatchers {
+trait LocalPathMatchers {
 
   val BSONObjectID: PathMatcher1[BSONObjectID] =
     PathMatcher("""[\da-fA-F]""".r) flatMap { string ⇒

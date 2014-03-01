@@ -1,9 +1,9 @@
-package com.blrest.mongo
+package com.infestrow.mongo
 
 import reactivemongo.api.MongoDriver
 import com.typesafe.config.ConfigFactory
 import akka.actor.ActorSystem
-import com.blrest.boot.MyActorSystem
+import com.infestrow.boot.MyActorSystem
 import scala.util.Properties
 import scala.concurrent.duration._
 import scala.concurrent.Await
@@ -50,8 +50,6 @@ trait ReactiveMongoConnection extends MyActorSystem with Logging {
 
   // Gets a reference to the collection "acoll"
   // By default, you get a BSONCollection.
-  val imageCollection = db(config.getString("blrest.image.collection"))
-  val tagCollection = db(config.getString("blrest.tag.collection"))
-  val tagResponseCollection = db(config.getString("blrest.tag_response.collection"))
+  val vaultCollection = db(config.getString("infescrow.vault.collection"))
 
 }

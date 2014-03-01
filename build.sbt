@@ -3,7 +3,7 @@ import spray.revolver.RevolverPlugin.Revolver
 
 organization := "simplyoverkill"
 
-name := "blrest"
+name := "infescrow"
 
 version := "0.1.0"
 

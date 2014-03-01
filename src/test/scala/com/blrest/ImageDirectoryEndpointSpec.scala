@@ -1,13 +1,13 @@
 package com.blrest
 
 import org.specs2.mutable.Specification
-import spray.testkit.Specs2RouteTest
-import com.blrest.endpoint.ImageDirectoryEndpoint
-import com.blrest.dao.ImageDirectoryDao
-import com.blrest.model.{FlickrData, ImageMeta}
+import com.infestrow.spray.testkit.Specs2RouteTest
+import com.infestrow.endpoint.ImageDirectoryEndpoint
+import com.infestrow.dao.ImageDirectoryDao
+import com.infestrow.model.{FlickrData, ImageMeta}
 import scala.util.Random
-import spray.http.StatusCodes._
-import spray.http.ContentTypes.`application/json`
+import com.infestrow.spray.http.StatusCodes._
+import com.infestrow.spray.http.ContentTypes.`application/json`
 
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
