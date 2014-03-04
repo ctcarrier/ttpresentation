@@ -15,6 +15,7 @@ import scala.concurrent.ExecutionContext
 import com.infestrow.spray.LocalPathMatchers
 import com.infestrow.dao.VaultDao
 import com.infestrow.model.Vault
+import com.infestrow.mongo.MongoAuthSupport
 
 /**
  * Created by ccarrier for bl-rest.
@@ -30,7 +31,7 @@ trait VaultActor extends Actor with VaultEndpoint {
   def receive = runRoute(vaultRoute)
 }
 
-trait VaultEndpoint extends HttpService with Logging with Json4sJacksonSupport with LocalPathMatchers {
+trait VaultEndpoint extends HttpService with Logging with Json4sJacksonSupport with LocalPathMatchers with MongoAuthSupport {
 
   import ExecutionContext.Implicits.global
 
@@ -38,26 +39,30 @@ trait VaultEndpoint extends HttpService with Logging with Json4sJacksonSupport w
 
   def vaultRoute =
     respondWithMediaType(`application/json`) {
+      authenticate(httpMongo()){ user =>
       pathPrefix("vaults") {
-        path(BSONObjectID) { key =>
+        path(BSONObjectIDSegment) { key =>
           get {
             complete {
               vaultDao.get(key)
             }
           }
         } ~
-        post {
-          entity(as[Vault]) { vault =>
+        path("") {
+          post {
+            entity(as[Vault]) { vault =>
+              complete {
+                vaultDao.save(vault)
+              }
+            }
+          } ~
+          get {
             complete {
-              vaultDao.save(vault)
+              vaultDao.getAll
             }
           }
-        } ~
-        get {
-          complete {
-            vaultDao.getAll
-          }
         }
+      }
       }
     }
 

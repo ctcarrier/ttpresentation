@@ -51,5 +51,6 @@ trait ReactiveMongoConnection extends MyActorSystem with Logging {
   // Gets a reference to the collection "acoll"
   // By default, you get a BSONCollection.
   val vaultCollection = db(config.getString("infescrow.vault.collection"))
+  val userCollection = db(config.getString("infescrow.user.collection"))
 
 }

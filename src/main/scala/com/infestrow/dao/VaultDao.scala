@@ -30,14 +30,13 @@ class VaultReactiveDao(db: DB, collection: BSONCollection, system: ActorSystem) 
   implicit val context = system.dispatcher
 
   def get(key: BSONObjectID): Future[Option[Vault]] = {
-    logger.debug("Getting vault: %s".format(key))
+    logger.info("Getting vault: %s".format(key))
     collection.find(BSONDocument("_id" -> key)).one[Vault]
   }
 
   def getAll: Future[List[Vault]] = {
     val query = BSONDocument("_id" -> BSONDocument("$exists" -> true))
     collection.find(query).cursor[Vault].collect[List]()
-    Future({Nil})
   }
 
   def save(v: Vault): Future[Option[Vault]] = {

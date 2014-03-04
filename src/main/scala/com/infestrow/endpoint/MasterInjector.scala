@@ -4,6 +4,7 @@ import akka.actor.Actor
 import org.json4s.DefaultFormats
 import com.infestrow.dao.VaultDao
 import com.infestrow.json.LocalJacksonFormats
+import com.infestrow.spray.LocalRejectionHandlers
 
 /**
  * Created by ccarrier for bl-rest.
@@ -11,11 +12,11 @@ import com.infestrow.json.LocalJacksonFormats
  */
 
 
-trait MasterInjector extends Actor with VaultEndpoint with LocalJacksonFormats {
+trait MasterInjector extends Actor with VaultEndpoint with UserEndpoint with LocalJacksonFormats with LocalRejectionHandlers {
 
   val vaultDao: VaultDao
 
   def actorRefFactory = context
 
-  def receive = runRoute(vaultRoute)
+  def receive = runRoute(userRoute ~ vaultRoute)
 }
