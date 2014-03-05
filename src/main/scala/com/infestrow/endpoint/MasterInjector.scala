@@ -12,11 +12,12 @@ import com.infestrow.spray.LocalRejectionHandlers
  */
 
 
-trait MasterInjector extends Actor with VaultEndpoint with UserEndpoint with LocalJacksonFormats with LocalRejectionHandlers {
+trait MasterInjector extends Actor with VaultEndpoint with UserEndpoint
+  with InviteEndpoint with LocalJacksonFormats with LocalRejectionHandlers {
 
   val vaultDao: VaultDao
 
   def actorRefFactory = context
 
-  def receive = runRoute(userRoute ~ vaultRoute)
+  def receive = runRoute(userRoute ~ vaultRoute ~ inviteRoute)
 }

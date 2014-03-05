@@ -11,7 +11,7 @@ import com.infestrow._
 
 import com.typesafe.scalalogging.slf4j.Logging
 
-import com.infestrow.model.Vault
+import com.infestrow.model.{User, Vault}
 
 /**
  * Created by ccarrier for bl-rest.
@@ -19,9 +19,9 @@ import com.infestrow.model.Vault
  */
 trait VaultDao {
 
-  def get(key: BSONObjectID): Future[Option[Vault]]
+  def get(key: BSONObjectID, user: User): Future[Option[Vault]]
   def save(v: Vault): Future[Option[Vault]]
-  def getAll: Future[List[Vault]]
+  def getAll(user: User): Future[List[Vault]]
 
 }
 
@@ -29,13 +29,13 @@ class VaultReactiveDao(db: DB, collection: BSONCollection, system: ActorSystem) 
 
   implicit val context = system.dispatcher
 
-  def get(key: BSONObjectID): Future[Option[Vault]] = {
+  def get(key: BSONObjectID, user: User): Future[Option[Vault]] = {
     logger.info("Getting vault: %s".format(key))
-    collection.find(BSONDocument("_id" -> key)).one[Vault]
+    collection.find(BSONDocument("_id" -> key, "userId" -> user._id)).one[Vault]
   }
 
-  def getAll: Future[List[Vault]] = {
-    val query = BSONDocument("_id" -> BSONDocument("$exists" -> true))
+  def getAll(user: User): Future[List[Vault]] = {
+    val query = BSONDocument("_id" -> BSONDocument("$exists" -> true), "userId" -> user._id)
     collection.find(query).cursor[Vault].collect[List]()
   }
 

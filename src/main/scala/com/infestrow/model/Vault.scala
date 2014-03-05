@@ -8,6 +8,6 @@ import reactivemongo.bson.{BSONObjectID, BSONDocumentReader, BSONDocument}
  */
 case class Vault(
                       _id: Option[BSONObjectID],
-                      name: String
+                      name: String, userId: Option[BSONObjectID]
                       )
 

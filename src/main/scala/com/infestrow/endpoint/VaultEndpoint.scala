@@ -40,29 +40,27 @@ trait VaultEndpoint extends HttpService with Logging with Json4sJacksonSupport w
   def vaultRoute =
     respondWithMediaType(`application/json`) {
       authenticate(httpMongo()){ user =>
-      pathPrefix("vaults") {
-        path(BSONObjectIDSegment) { key =>
+        path("vaults" / BSONObjectIDSegment) { key =>
           get {
             complete {
-              vaultDao.get(key)
+              vaultDao.get(key, user)
             }
           }
         } ~
-        path("") {
+          path("vaults") {
           post {
             entity(as[Vault]) { vault =>
               complete {
-                vaultDao.save(vault)
+                vaultDao.save(vault.copy(userId = user._id))
               }
             }
           } ~
           get {
             complete {
-              vaultDao.getAll
+              vaultDao.getAll(user)
             }
           }
         }
-      }
       }
     }
 

@@ -11,4 +11,5 @@ package object infestrow {
 
   implicit val vaultHandler = Macros.handler[Vault]
   implicit val userHandler = Macros.handler[User]
+  implicit val inviteHandler = Macros.handler[Invite]
 }

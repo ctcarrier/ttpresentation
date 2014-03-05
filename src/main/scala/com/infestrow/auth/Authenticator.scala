@@ -22,8 +22,7 @@ object FromMongoUserPassAuthenticator extends Logging with ReactiveMongoConnecti
 
         userPass match {
           case Some(up) => {
-            userCollection.find(BSONDocument("_id" -> up.user)).one[User].map(y => {
-
+            userCollection.find(BSONDocument("email" -> up.user)).one[User].map(y => {
               y match {
                 case Some(yu) => {
                   logger.info("Found user: %s".format(yu.email))
