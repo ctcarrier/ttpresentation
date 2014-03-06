@@ -14,7 +14,7 @@ import org.json4s.DefaultFormats
 import scala.concurrent.ExecutionContext
 import com.infestrow.spray.LocalPathMatchers
 import com.infestrow.dao.VaultDao
-import com.infestrow.model.Vault
+import com.infestrow.model.{VaultData, Vault}
 import com.infestrow.mongo.MongoAuthSupport
 
 /**
@@ -37,31 +37,36 @@ trait VaultEndpoint extends HttpService with Logging with Json4sJacksonSupport w
 
   val vaultDao: VaultDao
 
+  val startRoute = respondWithMediaType(`application/json`) & authenticate(httpMongo())
+  val directGetVault = path("vaults" / BSONObjectIDSegment) & get
+  val postVault = path("vaults") & post & entity(as[Vault])
+  val indirectGet = path("vaults") & get
+  val postData = path("vaults" / BSONObjectIDSegment / "data") & post & entity(as[VaultData])
+
   def vaultRoute =
-    respondWithMediaType(`application/json`) {
-      authenticate(httpMongo()){ user =>
-        path("vaults" / BSONObjectIDSegment) { key =>
-          get {
+    startRoute { user =>
+        directGetVault { key =>
             complete {
               vaultDao.get(key, user)
             }
-          }
         } ~
-          path("vaults") {
-          post {
-            entity(as[Vault]) { vault =>
+          postVault { vault =>
               complete {
                 vaultDao.save(vault.copy(userId = user._id))
               }
-            }
+
           } ~
-          get {
+          indirectGet {
             complete {
               vaultDao.getAll(user)
             }
+          } ~
+          postData { (key ,data) =>
+              complete {
+                vaultDao.save(data.copy(userId = user._id, vaultId = Some(key)))
+              }
           }
-        }
-      }
     }
+
 
 }

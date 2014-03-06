@@ -11,7 +11,7 @@ import com.infestrow._
 
 import com.typesafe.scalalogging.slf4j.Logging
 
-import com.infestrow.model.{User, Vault}
+import com.infestrow.model.{VaultData, User, Vault}
 
 /**
  * Created by ccarrier for bl-rest.
@@ -22,10 +22,11 @@ trait VaultDao {
   def get(key: BSONObjectID, user: User): Future[Option[Vault]]
   def save(v: Vault): Future[Option[Vault]]
   def getAll(user: User): Future[List[Vault]]
+  def save(vd: VaultData): Future[Option[VaultData]]
 
 }
 
-class VaultReactiveDao(db: DB, collection: BSONCollection, system: ActorSystem) extends VaultDao with Logging {
+class VaultReactiveDao(db: DB, collection: BSONCollection, dataCollection: BSONCollection, system: ActorSystem) extends VaultDao with Logging {
 
   implicit val context = system.dispatcher
 
@@ -43,5 +44,10 @@ class VaultReactiveDao(db: DB, collection: BSONCollection, system: ActorSystem) 
     val toSave = v.copy(_id = Some(BSONObjectID.generate))
     collection.save(toSave).map(x => {Some(toSave)})
 
+  }
+
+  def save(vd: VaultData): Future[Option[VaultData]] = {
+    val toSave = vd.copy(_id = Some(BSONObjectID.generate))
+    dataCollection.save(toSave).map(x => {Some(toSave)})
   }
 }
