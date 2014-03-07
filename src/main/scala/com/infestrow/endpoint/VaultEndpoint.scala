@@ -50,22 +50,22 @@ trait VaultEndpoint extends HttpService with Logging with Json4sJacksonSupport w
               vaultDao.get(key, user)
             }
         } ~
-          postVault { vault =>
-              complete {
-                vaultDao.save(vault.copy(userId = user._id))
-              }
-
-          } ~
-          indirectGet {
+        postVault { vault =>
             complete {
-              vaultDao.getAll(user)
+              vaultDao.save(vault.copy(userId = user._id))
             }
-          } ~
-          postData { (key ,data) =>
-              complete {
-                vaultDao.save(data.copy(userId = user._id, vaultId = Some(key)))
-              }
+
+        } ~
+        indirectGet {
+          complete {
+            vaultDao.getAll(user)
           }
+        } ~
+        postData { (key ,data) =>
+            complete {
+              vaultDao.save(data.copy(userId = user._id, vaultId = Some(key)), user)
+            }
+        }
     }
 
 

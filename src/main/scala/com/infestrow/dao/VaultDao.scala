@@ -22,7 +22,7 @@ trait VaultDao {
   def get(key: BSONObjectID, user: User): Future[Option[Vault]]
   def save(v: Vault): Future[Option[Vault]]
   def getAll(user: User): Future[List[Vault]]
-  def save(vd: VaultData): Future[Option[VaultData]]
+  def save(vd: VaultData, user: User): Future[Option[VaultData]]
 
 }
 
@@ -46,8 +46,17 @@ class VaultReactiveDao(db: DB, collection: BSONCollection, dataCollection: BSONC
 
   }
 
-  def save(vd: VaultData): Future[Option[VaultData]] = {
+  private def setVaultState(key: BSONObjectID, state: String){
+    val query = BSONDocument("_id" -> key)
+    val update = BSONDocument("$set" -> BSONDocument("state" -> state))
+
+    collection.update(query, update)
+  }
+
+  def save(vd: VaultData, user: User): Future[Option[VaultData]] = {
     val toSave = vd.copy(_id = Some(BSONObjectID.generate))
-    dataCollection.save(toSave).map(x => {Some(toSave)})
+    val result = dataCollection.save(toSave).map(x => {Some(toSave)})
+    setVaultState(vd.vaultId.get, Vault.CONFIRMED)
+    result
   }
 }
