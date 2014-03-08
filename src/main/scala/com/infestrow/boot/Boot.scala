@@ -12,6 +12,7 @@ import com.infestrow.dao._
 import akka.util.Timeout
 import scala.concurrent.duration._
 import akka.pattern.ask
+import com.infestrow.io.EmailActor
 
 /**
  * Created by ccarrier for bl-rest.

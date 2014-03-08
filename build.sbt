@@ -55,7 +55,9 @@ libraryDependencies ++= Seq(
   "org.reactivemongo" %% "reactivemongo" % "0.10.0" % "compile",
   "nl.grons" %% "metrics-scala" % "3.0.4",
   "com.codahale.metrics" % "metrics-graphite" % "3.0.1",
-  "org.mindrot" % "jbcrypt" % "0.3m"
+  "org.mindrot" % "jbcrypt" % "0.3m",
+  "javax.mail" % "mail" % "1.4.7",
+  "javax.activation" % "activation" % "1.1.1"
 )
 
 resolvers ++= Seq(

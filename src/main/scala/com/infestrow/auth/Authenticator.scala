@@ -25,12 +25,10 @@ object FromMongoUserPassAuthenticator extends Logging with ReactiveMongoConnecti
             userCollection.find(BSONDocument("email" -> up.user)).one[User].map(y => {
               y match {
                 case Some(yu) => {
-                  logger.info("Found user: %s".format(yu.email))
                   if (BCrypt.checkpw(up.pass, yu.password)) {
                     Some(yu)
                   }
                   else {
-                    logger.info("Password no match")
                     None
                   }
                 }
