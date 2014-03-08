@@ -14,7 +14,7 @@ import org.json4s.DefaultFormats
 import scala.concurrent.ExecutionContext
 import com.infestrow.spray.LocalPathMatchers
 import com.infestrow.dao.VaultDao
-import com.infestrow.model.{VaultData, Vault}
+import com.infestrow.model.{VaultAccess, VaultData, Vault}
 import com.infestrow.mongo.MongoAuthSupport
 
 /**
@@ -52,7 +52,7 @@ trait VaultEndpoint extends HttpService with Logging with Json4sJacksonSupport w
         } ~
         postVault { vault =>
             complete {
-              vaultDao.save(vault.copy(userId = user._id))
+              vaultDao.save(vault.copy(access = Some(VaultAccess(user._id.get, List(user.email)))))
             }
 
         } ~

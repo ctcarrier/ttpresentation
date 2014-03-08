@@ -23,6 +23,7 @@ trait VaultDao {
   def save(v: Vault): Future[Option[Vault]]
   def getAll(user: User): Future[List[Vault]]
   def save(vd: VaultData, user: User): Future[Option[VaultData]]
+  def addUser(key: BSONObjectID, email: String): Future[Option[Vault]]
 
 }
 
@@ -32,11 +33,11 @@ class VaultReactiveDao(db: DB, collection: BSONCollection, dataCollection: BSONC
 
   def get(key: BSONObjectID, user: User): Future[Option[Vault]] = {
     logger.info("Getting vault: %s".format(key))
-    collection.find(BSONDocument("_id" -> key, "userId" -> user._id)).one[Vault]
+    collection.find(BSONDocument("_id" -> key, "access.allowedUsers" -> BSONDocument("$in" -> List(user.email)))).one[Vault]
   }
 
   def getAll(user: User): Future[List[Vault]] = {
-    val query = BSONDocument("_id" -> BSONDocument("$exists" -> true), "userId" -> user._id)
+    val query = BSONDocument("_id" -> BSONDocument("$exists" -> true), "access.allowedUsers" -> BSONDocument("$in" -> List(user.email)))
     collection.find(query).cursor[Vault].collect[List]()
   }
 
@@ -44,6 +45,15 @@ class VaultReactiveDao(db: DB, collection: BSONCollection, dataCollection: BSONC
     val toSave = v.copy(_id = Some(BSONObjectID.generate))
     collection.save(toSave).map(x => {Some(toSave)})
 
+  }
+
+  def addUser(key: BSONObjectID, email: String): Future[Option[Vault]] = {
+    val query = BSONDocument("_id" -> key)
+    val update = BSONDocument("$addToSet" -> BSONDocument("access.allowedUsers" -> email))
+
+    collection.update(query, update).flatMap(x => {
+      collection.find(BSONDocument("_id" -> key, "access.allowedUsers" -> BSONDocument("$in" -> List(email)))).one[Vault]
+    })
   }
 
   private def setVaultState(key: BSONObjectID, state: String){

@@ -9,6 +9,7 @@ import com.infestrow.model._
  */
 package object infestrow {
 
+  implicit val vaultAccessHandler = Macros.handler[VaultAccess]
   implicit val vaultHandler = Macros.handler[Vault]
   implicit val dataHandler = Macros.handler[VaultData]
   implicit val userHandler = Macros.handler[User]
