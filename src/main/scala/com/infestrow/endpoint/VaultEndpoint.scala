@@ -16,6 +16,8 @@ import com.infestrow.spray.LocalPathMatchers
 import com.infestrow.dao.VaultDao
 import com.infestrow.model.{VaultAccess, VaultData, Vault}
 import com.infestrow.mongo.MongoAuthSupport
+import spray.routing.directives.LoggingMagnet
+import com.infestrow.auth.S3Policy
 
 /**
  * Created by ccarrier for bl-rest.
@@ -42,6 +44,7 @@ trait VaultEndpoint extends HttpService with Logging with Json4sJacksonSupport w
   val postVault = path("vaults") & post & entity(as[Vault])
   val indirectGet = path("vaults") & get
   val postData = path("vaults" / BSONObjectIDSegment / "data") & post & entity(as[VaultData])
+  val getVaultPolicy = path("policy") & get
 
   def vaultRoute =
     startRoute { user =>
@@ -65,6 +68,11 @@ trait VaultEndpoint extends HttpService with Logging with Json4sJacksonSupport w
             complete {
               vaultDao.save(data.copy(userId = user._id, vaultId = Some(key)), user)
             }
+        } ~
+        getVaultPolicy {
+          complete {
+            S3Policy.getPolicy
+          }
         }
     }
 

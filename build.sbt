@@ -57,7 +57,8 @@ libraryDependencies ++= Seq(
   "com.codahale.metrics" % "metrics-graphite" % "3.0.1",
   "org.mindrot" % "jbcrypt" % "0.3m",
   "javax.mail" % "mail" % "1.4.7",
-  "javax.activation" % "activation" % "1.1.1"
+  "javax.activation" % "activation" % "1.1.1",
+  "com.amazonaws" % "aws-java-sdk" % "1.7.3"
 )
 
 resolvers ++= Seq(

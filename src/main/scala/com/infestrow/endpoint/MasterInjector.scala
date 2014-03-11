@@ -5,6 +5,7 @@ import org.json4s.DefaultFormats
 import com.infestrow.dao.VaultDao
 import com.infestrow.json.LocalJacksonFormats
 import com.infestrow.spray.LocalRejectionHandlers
+import spray.routing.directives.LoggingMagnet
 
 /**
  * Created by ccarrier for bl-rest.
@@ -19,5 +20,5 @@ trait MasterInjector extends Actor with VaultEndpoint with UserEndpoint
 
   def actorRefFactory = context
 
-  def receive = runRoute(userRoute ~ vaultRoute ~ inviteRoute)
+  def receive = runRoute(logRequestResponse(LoggingMagnet.forRequestResponseFromMarkerAndLevel("static" -> akka.event.Logging.InfoLevel)){userRoute ~ vaultRoute ~ inviteRoute})
 }
