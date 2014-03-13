@@ -15,7 +15,11 @@ object Vault {
   val UNCONFIRMED = "unconfirmed"
 }
 
-case class VaultAccess(owner: BSONObjectID, allowedUsers: List[String] = List.empty)
+object VaultUser {
+  implicit def stringToVault(str: String) = VaultUser(str)
+}
+case class VaultUser(email: String, state: String = Vault.UNCONFIRMED)
+case class VaultAccess(owner: BSONObjectID, allowedUsers: List[VaultUser] = List.empty)
 
 case class Vault(
                       _id: Option[BSONObjectID],

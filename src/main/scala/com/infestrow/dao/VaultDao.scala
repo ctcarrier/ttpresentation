@@ -24,6 +24,7 @@ trait VaultDao {
   def getAll(user: User): Future[List[Vault]]
   def save(vd: VaultData, user: User): Future[Option[VaultData]]
   def addUser(key: BSONObjectID, email: String): Future[Option[Vault]]
+  def getVaultData(key: BSONObjectID, user: User): Future[Option[VaultData]]
 
 }
 
@@ -32,7 +33,6 @@ class VaultReactiveDao(db: DB, collection: BSONCollection, dataCollection: BSONC
   implicit val context = system.dispatcher
 
   def get(key: BSONObjectID, user: User): Future[Option[Vault]] = {
-    logger.info("Getting vault: %s".format(key))
     collection.find(BSONDocument("_id" -> key, "access.allowedUsers" -> BSONDocument("$in" -> List(user.email)))).one[Vault]
   }
 
@@ -68,5 +68,10 @@ class VaultReactiveDao(db: DB, collection: BSONCollection, dataCollection: BSONC
     val result = dataCollection.save(toSave).map(x => {Some(toSave)})
     setVaultState(vd.vaultId.get, Vault.CONFIRMED)
     result
+  }
+
+  def getVaultData(key: BSONObjectID, user: User): Future[Option[VaultData]] = {
+    logger.info("Getting VD with %s and %s".format(key.stringify, user.email))
+    dataCollection.find(BSONDocument("vaultId" -> key, "userId" -> user._id)).one[VaultData]
   }
 }

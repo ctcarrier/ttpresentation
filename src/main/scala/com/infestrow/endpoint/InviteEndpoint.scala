@@ -52,7 +52,17 @@ trait InviteEndpoint extends HttpService with Logging with Json4sJacksonSupport 
           } ~
           get {
             complete {
-              inviteDao.getAll(user)
+              inviteDao.getAll(user).map(il => {
+                il.map(i => {
+                  vaultDao.getVaultData(i.vaultId.get, user).map(vd => {
+                    logger.info(vd.toString)
+                    vd match {
+                      case Some(_) => i.copy(confirmed = Some(true))
+                      case _ => i
+                    }
+                  })
+                })
+              })
             }
           }
         }

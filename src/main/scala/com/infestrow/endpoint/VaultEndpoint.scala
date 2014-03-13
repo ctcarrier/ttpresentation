@@ -45,6 +45,7 @@ trait VaultEndpoint extends HttpService with Logging with Json4sJacksonSupport w
   val indirectGet = path("vaults") & get
   val postData = path("vaults" / BSONObjectIDSegment / "data") & post & entity(as[VaultData])
   val getVaultPolicy = path("policy") & get
+  val getVaultData = path("vaults" / BSONObjectIDSegment / "data") & get
 
   def vaultRoute =
     startRoute { user =>
@@ -72,6 +73,11 @@ trait VaultEndpoint extends HttpService with Logging with Json4sJacksonSupport w
         getVaultPolicy {
           complete {
             S3Policy.getPolicy
+          }
+        } ~
+        getVaultData {vaultId =>
+          complete {
+            vaultDao.getVaultData(vaultId, user)
           }
         }
     }
