@@ -7,11 +7,12 @@ import com.typesafe.scalalogging.slf4j.Logging
 import spray.httpx.Json4sJacksonSupport
 import com.infestrow.spray.LocalPathMatchers
 import com.infestrow.mongo.MongoAuthSupport
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{Await, ExecutionContext}
 import spray.http.MediaTypes._
-import com.infestrow.model.Invite
+import com.infestrow.model.{VaultData, Invite}
 import com.infestrow.io.{Email, EmailActor}
 import scala.util.Success
+import scala.concurrent.duration._
 
 /**
  * Created by ctcarrier on 3/4/14.
@@ -54,13 +55,10 @@ trait InviteEndpoint extends HttpService with Logging with Json4sJacksonSupport 
             complete {
               inviteDao.getAll(user).map(il => {
                 il.map(i => {
-                  vaultDao.getVaultData(i.vaultId.get, user).map(vd => {
-                    logger.info(vd.toString)
-                    vd match {
-                      case Some(_) => i.copy(confirmed = Some(true))
-                      case _ => i
-                    }
-                  })
+                  Await.result(vaultDao.getVaultData(i.vaultId.get, user), 1 second).asInstanceOf[Option[VaultData]] match {
+                    case Some(_) => i.copy(confirmed = Some(true))
+                    case _ => i
+                  }
                 })
               })
             }
