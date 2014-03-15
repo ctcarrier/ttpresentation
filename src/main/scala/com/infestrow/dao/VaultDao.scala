@@ -33,11 +33,11 @@ class VaultReactiveDao(db: DB, collection: BSONCollection, dataCollection: BSONC
   implicit val context = system.dispatcher
 
   def get(key: BSONObjectID, user: User): Future[Option[Vault]] = {
-    collection.find(BSONDocument("_id" -> key, "access.allowedUsers" -> BSONDocument("$in" -> List(user.email)))).one[Vault]
+    collection.find(BSONDocument("_id" -> key, "access.allowedUsers.email" -> BSONDocument("$in" -> List(user.email)))).one[Vault]
   }
 
   def getAll(user: User): Future[List[Vault]] = {
-    val query = BSONDocument("_id" -> BSONDocument("$exists" -> true), "access.allowedUsers" -> BSONDocument("$in" -> List(user.email)))
+    val query = BSONDocument("_id" -> BSONDocument("$exists" -> true), "access.allowedUsers.email" -> BSONDocument("$in" -> List(user.email)))
     collection.find(query).cursor[Vault].collect[List]()
   }
 
@@ -49,7 +49,7 @@ class VaultReactiveDao(db: DB, collection: BSONCollection, dataCollection: BSONC
 
   def addUser(key: BSONObjectID, email: String): Future[Option[Vault]] = {
     val query = BSONDocument("_id" -> key)
-    val update = BSONDocument("$addToSet" -> BSONDocument("access.allowedUsers" -> email))
+    val update = BSONDocument("$addToSet" -> BSONDocument("access.allowedUsers.email" -> email))
 
     collection.update(query, update).flatMap(x => {
       collection.find(BSONDocument("_id" -> key, "access.allowedUsers" -> BSONDocument("$in" -> List(email)))).one[Vault]
