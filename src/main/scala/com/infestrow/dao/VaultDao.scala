@@ -11,7 +11,11 @@ import com.infestrow._
 
 import com.typesafe.scalalogging.slf4j.Logging
 
-import com.infestrow.model.{VaultData, User, Vault}
+import com.infestrow.model._
+import com.infestrow.model.VaultData
+import scala.Some
+import reactivemongo.api.collections.default.BSONCollection
+import scala.util.Success
 
 /**
  * Created by ccarrier for bl-rest.
@@ -20,15 +24,17 @@ import com.infestrow.model.{VaultData, User, Vault}
 trait VaultDao {
 
   def get(key: BSONObjectID, user: User): Future[Option[Vault]]
-  def save(v: Vault): Future[Option[Vault]]
+  def save(v: Vault, user: User): Future[Option[Vault]]
   def getAll(user: User): Future[List[Vault]]
   def save(vd: VaultData, user: User): Future[Option[VaultData]]
-  def addUser(key: BSONObjectID, email: String): Future[Option[Vault]]
+  def addUser(key: BSONObjectID, vaultUser: VaultUser): Future[Option[Vault]]
   def getVaultData(key: BSONObjectID, user: User): Future[Option[VaultData]]
+  def getVaultUserState(vaultId: BSONObjectID, email: String): Future[Option[String]]
+  def getVaultState(key: BSONObjectID): Future[List[VaultUser]]
 
 }
 
-class VaultReactiveDao(db: DB, collection: BSONCollection, dataCollection: BSONCollection, system: ActorSystem) extends VaultDao with Logging {
+class VaultReactiveDao(db: DB, collection: BSONCollection, dataCollection: BSONCollection, stateCollection: BSONCollection, system: ActorSystem) extends VaultDao with Logging {
 
   implicit val context = system.dispatcher
 
@@ -41,32 +47,53 @@ class VaultReactiveDao(db: DB, collection: BSONCollection, dataCollection: BSONC
     collection.find(query).cursor[Vault].collect[List]()
   }
 
-  def save(v: Vault): Future[Option[Vault]] = {
-    val toSave = v.copy(_id = Some(BSONObjectID.generate))
-    collection.save(toSave).map(x => {Some(toSave)})
-
-  }
-
-  def addUser(key: BSONObjectID, email: String): Future[Option[Vault]] = {
-    val query = BSONDocument("_id" -> key)
-    val update = BSONDocument("$addToSet" -> BSONDocument("access.allowedUsers.email" -> email))
-
-    collection.update(query, update).flatMap(x => {
-      collection.find(BSONDocument("_id" -> key, "access.allowedUsers" -> BSONDocument("$in" -> List(email)))).one[Vault]
+  def save(v: Vault, user: User): Future[Option[Vault]] = {
+    val toSave = v.copy(_id = Some(BSONObjectID.generate), access = Some(VaultAccess(user._id.get, List(user.email))))
+    collection.save(toSave).map(x => {
+      setVaultUserState(toSave._id.get, user.email, Vault.UNCONFIRMED)
+      Some(toSave)
     })
   }
 
-  private def setVaultState(key: BSONObjectID, state: String){
+  def addUser(key: BSONObjectID, vaultUser: VaultUser): Future[Option[Vault]] = {
     val query = BSONDocument("_id" -> key)
+    val update = BSONDocument("$addToSet" -> BSONDocument("access.allowedUsers" -> vaultUser))
+
+    collection.update(query, update).flatMap(x => {
+      collection.find(BSONDocument("_id" -> key, "access.allowedUsers.email" -> BSONDocument("$in" -> List(vaultUser.email)))).one[Vault].andThen({
+        case Success(v) => setVaultUserState(key, vaultUser.email, Vault.UNCONFIRMED)
+      })
+    })
+  }
+
+  def getVaultState(key: BSONObjectID): Future[List[VaultUser]] = {
+    val query = BSONDocument("vaultId" -> key)
+
+    collection.find(query).cursor[VaultUser].collect[List]()
+  }
+
+  private def setVaultUserState(key: BSONObjectID, email: String, state: String){
+    val query = BSONDocument("email" -> email, "vaultId" -> key)
     val update = BSONDocument("$set" -> BSONDocument("state" -> state))
 
-    collection.update(query, update)
+    collection.update(selector = query, update = update, upsert = true)
+  }
+
+  def getVaultUserState(vaultId: BSONObjectID, email: String): Future[Option[String]] = {
+    val query = BSONDocument("email" -> email, "vaultId" -> vaultId)
+
+    collection.find(query).one[BSONDocument].map(us => {
+      us match {
+        case Some(doc) => doc.getAs[String]("state")
+        case _ => None
+      }
+    })
   }
 
   def save(vd: VaultData, user: User): Future[Option[VaultData]] = {
     val toSave = vd.copy(_id = Some(BSONObjectID.generate))
     val result = dataCollection.save(toSave).map(x => {Some(toSave)})
-    setVaultState(vd.vaultId.get, Vault.CONFIRMED)
+    setVaultUserState(vd.vaultId.get, user.email, Vault.CONFIRMED)
     result
   }
 

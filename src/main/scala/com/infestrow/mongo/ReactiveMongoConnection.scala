@@ -55,6 +55,7 @@ trait ReactiveMongoConnection extends MyActorSystem with Logging {
   val dataCollection = db(config.getString("infescrow.vaultdata.collection"))
   val userCollection = db(config.getString("infescrow.user.collection"))
   val inviteCollection = db(config.getString("infescrow.invite.collection"))
+  val stateCollection = db(config.getString("infescrow.userstate.collection"))
 
 
   userCollection.indexesManager.ensure(Index(

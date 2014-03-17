@@ -15,7 +15,7 @@ trait InviteDao {
 
   def get(key: BSONObjectID, user: User): Future[Option[Invite]]
   def save(v: Invite): Future[Option[Invite]]
-  def getAll(user: User): Future[List[Invite]]
+  def getAll(vaultId: BSONObjectID, user: User): Future[List[Invite]]
 
 }
 
@@ -28,8 +28,8 @@ class InviteReactiveDao(db: DB, collection: BSONCollection, system: ActorSystem)
     collection.find(BSONDocument("_id" -> key, "userId" -> user._id)).one[Invite]
   }
 
-  def getAll(user: User): Future[List[Invite]] = {
-    val query = BSONDocument("_id" -> BSONDocument("$exists" -> true), "userId" -> user._id)
+  def getAll(vaultId: BSONObjectID, user: User): Future[List[Invite]] = {
+    val query = BSONDocument("_id" -> BSONDocument("$exists" -> true), "vaultId" -> vaultId, "userId" -> user._id)
     collection.find(query).cursor[Invite].collect[List]()
   }
 

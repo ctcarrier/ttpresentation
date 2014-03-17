@@ -42,7 +42,7 @@ object Boot extends App with Logging with ReactiveMongoConnection with MyActorSy
   val host = "0.0.0.0"
   val port = Properties.envOrElse("PORT", "8080").toInt
 
-  private val vaultDao: VaultDao = new VaultReactiveDao(db, vaultCollection, dataCollection, system)
+  private val vaultDao: VaultDao = new VaultReactiveDao(db, vaultCollection, dataCollection, stateCollection, system)
   private val userDao: UserDao = new UserReactiveDao(db, userCollection, system)
   private val inviteDao: InviteDao = new InviteReactiveDao(db, inviteCollection, system)
 

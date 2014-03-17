@@ -53,9 +53,9 @@ trait InviteEndpoint extends HttpService with Logging with Json4sJacksonSupport 
           } ~
           get {
             complete {
-              inviteDao.getAll(user).map(il => {
+              inviteDao.getAll(vaultId, user).map(il => {
                 il.map(i => {
-                  Await.result(vaultDao.getVaultData(i.vaultId.get, user), 1 second).asInstanceOf[Option[VaultData]] match {
+                  Await.result(vaultDao.getVaultUserState(vaultId, user.email), 1 second).asInstanceOf[Option[String]] match {
                     case Some(_) => i.copy(confirmed = Some(true))
                     case _ => i
                   }
