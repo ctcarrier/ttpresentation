@@ -15,7 +15,9 @@ import com.infestrow.model._
 import com.infestrow.model.VaultData
 import scala.Some
 import reactivemongo.api.collections.default.BSONCollection
-import scala.util.Success
+import scala.util.{Failure, Success}
+import reactivemongo.core.commands.{FindAndModify, Update}
+import org.joda.time.DateTime
 
 /**
  * Created by ccarrier for bl-rest.
@@ -31,6 +33,9 @@ trait VaultDao {
   def getVaultData(key: BSONObjectID, user: User): Future[Option[VaultData]]
   def getVaultUserState(vaultId: BSONObjectID, email: String): Future[Option[String]]
   def getVaultState(key: BSONObjectID): Future[List[VaultUser]]
+  def markAndReturn(vaultId: BSONObjectID, state: String): Future[Option[Vault]]
+  def getAllVaultUserState(vaultId: BSONObjectID): Future[List[Option[String]]]
+  def getUnlockedVaults(): Future[List[Vault]]
 
 }
 
@@ -76,18 +81,39 @@ class VaultReactiveDao(db: DB, collection: BSONCollection, dataCollection: BSONC
     val query = BSONDocument("email" -> email, "vaultId" -> key)
     val update = BSONDocument("$set" -> BSONDocument("state" -> state))
 
-    collection.update(selector = query, update = update, upsert = true)
+    stateCollection.update(selector = query, update = update, upsert = true).map(le => {
+      if (le.ok){
+        getAllVaultUserState(key).map(sl => {
+          sl.collect({
+            case None => None
+            case Some(str) if !str.equals(Vault.CONFIRMED) => Some(str)
+          })
+        }).andThen({
+          case Success(l: List[Option[String]]) if l.isEmpty => {
+            logger.info("Setting vault %s to unlocked".format(key))
+            setVaultState(key, Vault.UNLOCKED)
+          }
+          case _ => logger.error("Got some kind of error processing vault state in vault: ".format(key))
+        })
+      }
+    })
   }
 
   def getVaultUserState(vaultId: BSONObjectID, email: String): Future[Option[String]] = {
     val query = BSONDocument("email" -> email, "vaultId" -> vaultId)
 
-    collection.find(query).one[BSONDocument].map(us => {
+    stateCollection.find(query).one[BSONDocument].map(us => {
       us match {
         case Some(doc) => doc.getAs[String]("state")
         case _ => None
       }
     })
+  }
+
+  def getAllVaultUserState(vaultId: BSONObjectID): Future[List[Option[String]]] = {
+    val query = BSONDocument("vaultId" -> vaultId)
+
+    stateCollection.find(query).cursor[BSONDocument].collect[List]().map(x => x.map(y => y.getAs[String]("state")))
   }
 
   def save(vd: VaultData, user: User): Future[Option[VaultData]] = {
@@ -101,4 +127,33 @@ class VaultReactiveDao(db: DB, collection: BSONCollection, dataCollection: BSONC
     logger.info("Getting VD with %s and %s".format(key.stringify, user.email))
     dataCollection.find(BSONDocument("vaultId" -> key, "userId" -> user._id)).one[VaultData]
   }
+
+  def setVaultState(vaultId: BSONObjectID, state: String) {
+    val query = BSONDocument("_id" -> vaultId)
+    val update = BSONDocument("$set" -> BSONDocument("state" -> state))
+
+    collection.update(selector = query, update = update, upsert = true)
+  }
+
+  def getUnlockedVaults(): Future[List[Vault]] = {
+    val selector = BSONDocument(
+      "state" -> Vault.UNLOCKED, "unlockDate" -> BSONDocument("$lt" -> DateTime.now()))
+    collection.find(selector).cursor[Vault].collect[List]()
+
+  }
+
+  def markAndReturn(vaultId: BSONObjectID, state: String): Future[Option[Vault]] = {
+    val selector = BSONDocument("_id" -> vaultId)
+    val modifier = BSONDocument("$set" -> BSONDocument("state" -> state))
+
+    val command = FindAndModify(
+      collection.name,
+      selector,
+      Update(modifier, false))
+
+    db.command(command).map(x => x.map(y => y.as[Vault]))
+
+
+  }
+
 }

@@ -33,7 +33,7 @@ trait InviteEndpoint extends HttpService with Logging with Json4sJacksonSupport 
   val inviteDao: InviteDao
   val vaultDao: VaultDao
 
-  val emailActor = actorRefFactory.actorOf(Props(classOf[EmailActor]))
+  val emailActor: ActorRef
 
   def inviteRoute =
     respondWithMediaType(`application/json`) {

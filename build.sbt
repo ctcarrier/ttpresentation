@@ -53,12 +53,11 @@ libraryDependencies ++= Seq(
   "org.scalamock" %% "scalamock-specs2-support" % "3.0.1" % "test",
   //ReactiveMongo
   "org.reactivemongo" %% "reactivemongo" % "0.10.0" % "compile",
-  "nl.grons" %% "metrics-scala" % "3.0.4",
-  "com.codahale.metrics" % "metrics-graphite" % "3.0.1",
   "org.mindrot" % "jbcrypt" % "0.3m",
   "javax.mail" % "mail" % "1.4.7",
   "javax.activation" % "activation" % "1.1.1",
-  "com.amazonaws" % "aws-java-sdk" % "1.7.3"
+  "com.amazonaws" % "aws-java-sdk" % "1.7.3",
+  "com.github.nscala-time" %% "nscala-time" % "0.8.0"
 )
 
 resolvers ++= Seq(
