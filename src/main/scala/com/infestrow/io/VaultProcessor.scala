@@ -6,11 +6,27 @@ import scala.concurrent.ExecutionContext
 import com.infestrow.dao.VaultDao
 import akka.io.TickGenerator.Tick
 import scala.util.Success
-import com.infestrow.model.Vault
+import com.infestrow.model.{VaultData, Vault}
 
 /**
  * Created by ctcarrier on 3/28/14.
  */
+
+case class ProcessedVaultMessage(vault: Vault, vaultData: List[VaultData])
+object ProcessedVaultMessage {
+  implicit def pvmToString(pvm: ProcessedVaultMessage): String = {
+    val dataString = pvm.vaultData.map(_.data).mkString("\n")
+    "Processed %s\n%s".format(pvm.vault.name, dataString)
+  }
+}
+
+case class ProcessedVaultSubject(vault: Vault)
+object ProcessedVaultSubject {
+  implicit def pvmToString(pvm: ProcessedVaultSubject): String = {
+    "Processed %s".format(pvm.vault.name)
+  }
+}
+
 trait VaultProcessor extends Actor with Logging {
 
   import ExecutionContext.Implicits.global
@@ -25,8 +41,12 @@ trait VaultProcessor extends Actor with Logging {
           vaultDao.markAndReturn(v._id.get, Vault.CONFIRMED).andThen({
             case Success(vault) => {
               vault.map(x => {
-                logger.info("Processed %s".format(v.name))
-                emailActor ! Email("ctcarrier@gmail.com", "Processed", "Processed %s".format(v.name))
+                vaultDao.getAllVaultData(x._id.get).map(vd => {
+                  vd.foreach(vdi => {
+                    logger.info("Processed %s to: %s".format(v.name, vdi.user.get.email))
+                    emailActor ! Email(vdi.user.get.email, ProcessedVaultSubject(x), ProcessedVaultMessage(x, vd))
+                  })
+                })
               })
             }
           })

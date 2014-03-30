@@ -28,7 +28,7 @@ trait VaultDao {
   def get(key: BSONObjectID, user: User): Future[Option[Vault]]
   def save(v: Vault, user: User): Future[Option[Vault]]
   def getAll(user: User): Future[List[Vault]]
-  def save(vd: VaultData, user: User): Future[Option[VaultData]]
+  def save(vd: VaultData, _user: User, _vaultId: BSONObjectID): Future[Option[VaultData]]
   def addUser(key: BSONObjectID, vaultUser: VaultUser): Future[Option[Vault]]
   def getVaultData(key: BSONObjectID, user: User): Future[Option[VaultData]]
   def getVaultUserState(vaultId: BSONObjectID, email: String): Future[Option[String]]
@@ -36,6 +36,7 @@ trait VaultDao {
   def markAndReturn(vaultId: BSONObjectID, state: String): Future[Option[Vault]]
   def getAllVaultUserState(vaultId: BSONObjectID): Future[List[Option[String]]]
   def getUnlockedVaults(): Future[List[Vault]]
+  def getAllVaultData(key: BSONObjectID): Future[List[VaultData]]
 
 }
 
@@ -74,7 +75,7 @@ class VaultReactiveDao(db: DB, collection: BSONCollection, dataCollection: BSONC
   def getVaultState(key: BSONObjectID): Future[List[VaultUser]] = {
     val query = BSONDocument("vaultId" -> key)
 
-    collection.find(query).cursor[VaultUser].collect[List]()
+    stateCollection.find(query).cursor[VaultUser].collect[List]()
   }
 
   private def setVaultUserState(key: BSONObjectID, email: String, state: String){
@@ -116,16 +117,25 @@ class VaultReactiveDao(db: DB, collection: BSONCollection, dataCollection: BSONC
     stateCollection.find(query).cursor[BSONDocument].collect[List]().map(x => x.map(y => y.getAs[String]("state")))
   }
 
-  def save(vd: VaultData, user: User): Future[Option[VaultData]] = {
-    val toSave = vd.copy(_id = Some(BSONObjectID.generate))
+  def save(vd: VaultData, _user: User, _vaultId: BSONObjectID): Future[Option[VaultData]] = {
+    val toSave = vd.copy(_id = Some(BSONObjectID.generate), vaultId = Some(_vaultId), user = Some(_user))
     val result = dataCollection.save(toSave).map(x => {Some(toSave)})
-    setVaultUserState(vd.vaultId.get, user.email, Vault.CONFIRMED)
+    setVaultUserState(vd.vaultId.get, _user.email, Vault.CONFIRMED)
     result
   }
 
   def getVaultData(key: BSONObjectID, user: User): Future[Option[VaultData]] = {
     logger.info("Getting VD with %s and %s".format(key.stringify, user.email))
-    dataCollection.find(BSONDocument("vaultId" -> key, "userId" -> user._id)).one[VaultData]
+    dataCollection.find(BSONDocument("vaultId" -> key, "user._id" -> user._id)).one[VaultData]
+  }
+
+  def getAllVaultData(key: BSONObjectID): Future[List[VaultData]] = {
+    val res = dataCollection.find(BSONDocument("vaultId" -> key)).cursor[VaultData].collect[List]().map(x =>{
+      logger.info("AllVD: %s".format(x))
+      x
+    }
+    )
+    res
   }
 
   def setVaultState(vaultId: BSONObjectID, state: String) {

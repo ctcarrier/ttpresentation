@@ -5,19 +5,23 @@ import MediaTypes._
 
 import com.typesafe.scalalogging.slf4j.Logging
 
-import spray.routing.HttpService
 import spray.httpx.Json4sJacksonSupport
 
 import akka.actor.Actor
 
 import org.json4s.DefaultFormats
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{Future, ExecutionContext}
 import com.infestrow.spray.LocalPathMatchers
 import com.infestrow.dao.VaultDao
-import com.infestrow.model.{VaultAccess, VaultData, Vault}
+import com.infestrow.model.{User, VaultAccess, VaultData, Vault}
 import com.infestrow.mongo.MongoAuthSupport
-import spray.routing.directives.LoggingMagnet
+
+import spray.routing._
+import Directives._
+
 import com.infestrow.auth.S3Policy
+import reactivemongo.bson.BSONObjectID
+import shapeless._
 
 /**
  * Created by ccarrier for bl-rest.
@@ -33,6 +37,9 @@ trait VaultActor extends Actor with VaultEndpoint {
   def receive = runRoute(vaultRoute)
 }
 
+case class BadIdInUrlRejection(message: String) extends Rejection
+case class InvalidUrlException(message: String) extends Exception
+
 trait VaultEndpoint extends HttpService with Logging with Json4sJacksonSupport with LocalPathMatchers with MongoAuthSupport {
 
   import ExecutionContext.Implicits.global
@@ -46,6 +53,7 @@ trait VaultEndpoint extends HttpService with Logging with Json4sJacksonSupport w
   val postData = path("vaults" / BSONObjectIDSegment / "data") & post & entity(as[VaultData])
   val getVaultPolicy = path("policy") & get
   val getVaultData = path("vaults" / BSONObjectIDSegment / "data") & get
+  val getResults = path("vaults" / BSONObjectIDSegment / "results") & get
   val getVaultState = path("vaults" / BSONObjectIDSegment / "states") & get
 
   def vaultRoute =
@@ -68,7 +76,7 @@ trait VaultEndpoint extends HttpService with Logging with Json4sJacksonSupport w
         } ~
         postData { (key ,data) =>
             complete {
-              vaultDao.save(data.copy(userId = user._id, vaultId = Some(key)), user)
+              vaultDao.save(data, user, key)
             }
         } ~
         getVaultPolicy {
@@ -79,6 +87,16 @@ trait VaultEndpoint extends HttpService with Logging with Json4sJacksonSupport w
         getVaultData {vaultId =>
           complete {
             vaultDao.getVaultData(vaultId, user)
+          }
+        } ~
+        getResults {vaultId =>
+          complete {
+            vaultDao.get(vaultId, user).flatMap(vo => {
+              vo match {
+                case Some(v) if v.state.equals(Vault.CONFIRMED) => vaultDao.getAllVaultData(vaultId)
+                case _ => Future.failed(InvalidUrlException("Vault not ready"))
+              }
+            })
           }
         } ~
         getVaultState {vaultId =>

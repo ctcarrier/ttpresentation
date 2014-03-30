@@ -19,10 +19,10 @@ package object infestrow {
     def write(jdtime: DateTime) = BSONDateTime(jdtime.getMillis)
   }
 
+  implicit val userHandler = Macros.handler[User]
   implicit val vaultUserHandler = Macros.handler[VaultUser]
   implicit val vaultAccessHandler = Macros.handler[VaultAccess]
   implicit val vaultHandler = Macros.handler[Vault]
   implicit val dataHandler = Macros.handler[VaultData]
-  implicit val userHandler = Macros.handler[User]
   implicit val inviteHandler = Macros.handler[Invite]
 }
