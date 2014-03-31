@@ -15,15 +15,15 @@ import com.infestrow.model.{VaultData, Vault}
 case class ProcessedVaultMessage(vault: Vault, vaultData: List[VaultData])
 object ProcessedVaultMessage {
   implicit def pvmToString(pvm: ProcessedVaultMessage): String = {
-    val dataString = pvm.vaultData.map(_.data).mkString("\n")
-    "Processed %s\n%s".format(pvm.vault.name, dataString)
+    val dataString = pvm.vaultData.map(x => "%s - %s".format(x.user.get.email, x.data)).mkString("<p>")
+    "<p><h1>Vault %s has unlocked.</h1></p><p>Below you will find the data added by each participant.</p>%s".format(pvm.vault.name, dataString)
   }
 }
 
 case class ProcessedVaultSubject(vault: Vault)
 object ProcessedVaultSubject {
   implicit def pvmToString(pvm: ProcessedVaultSubject): String = {
-    "Processed %s".format(pvm.vault.name)
+    "Vault %s has unlocked.".format(pvm.vault.name)
   }
 }
 
