@@ -1,9 +1,9 @@
-package com.infestrow.mongo
+package com.ttpresentation.mongo
 
 import spray.routing.authentication._
 import scala.concurrent.ExecutionContext
 import ExecutionContext.Implicits.global
-import com.infestrow.auth.FromMongoUserPassAuthenticator
+import com.ttpresentation.auth.FromMongoUserPassAuthenticator
 
 /**
  * Created with IntelliJ IDEA.

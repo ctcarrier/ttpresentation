@@ -1,4 +1,4 @@
-package com.infestrow.auth
+package com.ttpresentation.auth
 
 import com.typesafe.config.ConfigFactory
 import scala.concurrent.{Future, ExecutionContext}
@@ -6,8 +6,8 @@ import spray.routing.authentication._
 import scala.Some
 import org.mindrot.jbcrypt.BCrypt
 import com.typesafe.scalalogging.slf4j.Logging
-import com.infestrow.model.User
-import com.infestrow.mongo.ReactiveMongoConnection
+import com.ttpresentation.model.User
+import com.ttpresentation.mongo.ReactiveMongoConnection
 import reactivemongo.bson._
 
 /**

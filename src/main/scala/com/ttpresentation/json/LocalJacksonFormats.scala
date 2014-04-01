@@ -1,4 +1,4 @@
-package com.infestrow.json
+package com.ttpresentation.json
 
 import org.json4s.jackson.Serialization
 import org.json4s._

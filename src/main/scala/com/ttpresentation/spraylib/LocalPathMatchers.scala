@@ -1,4 +1,4 @@
-package com.infestrow.spray
+package com.ttpresentation.spraylib
 
 import spray.routing._
 import scala.Some

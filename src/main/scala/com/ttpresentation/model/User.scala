@@ -1,4 +1,4 @@
-package com.infestrow.model
+package com.ttpresentation.model
 
 import reactivemongo.bson.BSONObjectID
 
@@ -15,6 +15,7 @@ object User {
     }
   }
 }
+
 case class User(_id: Option[BSONObjectID], email: String, password: String) {
 
   require (User.validEmail(email), "Invalid email")

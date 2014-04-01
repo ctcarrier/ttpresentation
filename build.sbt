@@ -1,9 +1,9 @@
 import com.typesafe.sbt.SbtStartScript
 import spray.revolver.RevolverPlugin.Revolver
 
-organization := "simplyoverkill"
+organization := "ccarrier"
 
-name := "infescrow"
+name := "ttpresentation"
 
 version := "0.1.0"
 
@@ -36,20 +36,20 @@ libraryDependencies ++= Seq(
   "ch.qos.logback" % "logback-classic" % "0.9.28" % "runtime",
   "ch.qos.logback" % "logback-core" % "0.9.28" % "runtime",
     //SPRAY
-    "io.spray" % "spray-routing" % "1.2.0" % "compile" withSources(),
-    "io.spray" % "spray-http" % "1.2.0" % "compile" withSources(),
-    "io.spray" % "spray-can" % "1.2.0" % "compile" withSources(),
-    "io.spray" % "spray-io" % "1.2.0" % "compile" withSources(),
-    "io.spray" % "spray-caching" % "1.2.0" % "compile" withSources(),
-  "io.spray" % "spray-client" % "1.2.0" % "compile" withSources(),
-  "io.spray" % "spray-testkit" % "1.2.0" % "compile" withSources(),
+    "io.spraylib" % "spraylib-routing" % "1.2.0" % "compile" withSources(),
+    "io.spraylib" % "spraylib-http" % "1.2.0" % "compile" withSources(),
+    "io.spraylib" % "spraylib-can" % "1.2.0" % "compile" withSources(),
+    "io.spraylib" % "spraylib-io" % "1.2.0" % "compile" withSources(),
+    "io.spraylib" % "spraylib-caching" % "1.2.0" % "compile" withSources(),
+  "io.spraylib" % "spraylib-client" % "1.2.0" % "compile" withSources(),
+  "io.spraylib" % "spraylib-testkit" % "1.2.0" % "compile" withSources(),
     //AKKA
     "com.typesafe.akka" %% "akka-actor" % "2.2.3",
   "com.typesafe.akka" %% "akka-slf4j" % "2.2.3",
     //Jackson
   "org.json4s" %% "json4s-jackson" % "3.2.6",
   //TESTING
-  "org.specs2" %% "specs2" % "2.3.6" % "test" exclude("com.chuusai", "shapeless_2.10.3"),
+  "org.specs2" %% "specs2" % "2.3.10" % "test" exclude("com.chuusai", "shapeless_2.10.3"),
   "org.scalamock" %% "scalamock-specs2-support" % "3.0.1" % "test",
   //ReactiveMongo
   "org.reactivemongo" %% "reactivemongo" % "0.10.0" % "compile",
@@ -64,14 +64,9 @@ resolvers ++= Seq(
   "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
   "Sonatype OSS" at "http://oss.sonatype.org/content/repositories/releases/",
   "Sonatype OSS Snapshots" at "http://oss.sonatype.org/content/repositories/snapshots/",
-  "Spray repo" at "http://repo.spray.cc",
+  "Spray repo" at "http://repo.spraylib.cc",
   "Bintray" at "http://jcenter.bintray.com",
   "Neo4J" at "http://m2.neo4j.org/content/repositories/releases",
   "Local Maven Repository" at "file://" + Path.userHome + "/.m2/repository"
 )
 
-scalacOptions in Test ++= Seq("-Yrangepos")
-
-testOptions in Test += Tests.Setup( loader => {
-  System.setProperty("config.resource", "test.conf")
-} )

@@ -1,9 +1,9 @@
-package com.infestrow.mongo
+package com.ttpresentation.mongo
 
 import reactivemongo.api.MongoDriver
 import com.typesafe.config.ConfigFactory
 import akka.actor.ActorSystem
-import com.infestrow.boot.MyActorSystem
+import com.ttpresentation.boot.MyActorSystem
 import scala.util.Properties
 import scala.concurrent.duration._
 import scala.concurrent.Await
@@ -51,16 +51,6 @@ trait ReactiveMongoConnection extends MyActorSystem with Logging {
 
   // Gets a reference to the collection "acoll"
   // By default, you get a BSONCollection.
-  val vaultCollection = db(config.getString("infescrow.vault.collection"))
-  val dataCollection = db(config.getString("infescrow.vaultdata.collection"))
-  val userCollection = db(config.getString("infescrow.user.collection"))
-  val inviteCollection = db(config.getString("infescrow.invite.collection"))
-  val stateCollection = db(config.getString("infescrow.userstate.collection"))
-
-
-  userCollection.indexesManager.ensure(Index(
-    key = Seq("email" -> IndexType.Ascending),
-    unique = true,
-    dropDups = true
-  ))
+  val vaultCollection = db(config.getString("ttpresentation.vault.collection"))
+  val userCollection = db(config.getString("ttpresentation.user.collection"))
 }

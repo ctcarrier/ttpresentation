@@ -1,11 +1,11 @@
-package com.infestrow.spray
+package com.ttpresentation.spraylib
 
 import spray.routing._
 import spray.http._
 import StatusCodes._
 import Directives._
 import reactivemongo.core.commands.LastError
-import com.infestrow.endpoint.{InvalidUrlException, BadIdInUrlRejection}
+import com.ttpresentation.endpoint.{InvalidUrlException, BadIdInUrlRejection}
 
 /**
  * Created by ctcarrier on 3/3/14.

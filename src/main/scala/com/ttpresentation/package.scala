@@ -1,7 +1,7 @@
 package com
 
 import reactivemongo.bson.{BSONHandler, BSONDateTime, Macros}
-import com.infestrow.model._
+import com.ttpresentation.model._
 import com.github.nscala_time.time.Imports._
 import org.joda.time.format.ISODateTimeFormat
 
@@ -9,7 +9,7 @@ import org.joda.time.format.ISODateTimeFormat
  * Created by ccarrier for bl-rest.
  * at 3:19 PM on 12/15/13
  */
-package object infestrow {
+package object ttpresentation {
 
   DateTimeZone.setDefault(DateTimeZone.UTC)
 
@@ -20,9 +20,5 @@ package object infestrow {
   }
 
   implicit val userHandler = Macros.handler[User]
-  implicit val vaultUserHandler = Macros.handler[VaultUser]
-  implicit val vaultAccessHandler = Macros.handler[VaultAccess]
   implicit val vaultHandler = Macros.handler[Vault]
-  implicit val dataHandler = Macros.handler[VaultData]
-  implicit val inviteHandler = Macros.handler[Invite]
 }
