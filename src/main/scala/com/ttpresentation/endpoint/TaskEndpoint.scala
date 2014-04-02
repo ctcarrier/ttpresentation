@@ -18,7 +18,8 @@ import com.ttpresentation.model.{User, Task}
 import com.ttpresentation.mongo.MongoAuthSupport
 
 import spray.routing._
-import com.ttpresentation.actor.{Message, HashActor}
+import com.ttpresentation.Message
+import com.ttpresentation.{Message, HashActor}
 
 /**
  * Created by ccarrier for bl-rest.
@@ -50,9 +51,9 @@ trait TaskEndpoint extends HttpService with Logging with Json4sJacksonSupport wi
   def taskRoute =
     startRoute { user =>
         directGetTask { key =>
-            complete {
-              taskDao.get(key, user)
-            }
+          complete {
+            taskDao.get(key, user)
+          }
         } ~
         postTask { task =>
           complete {

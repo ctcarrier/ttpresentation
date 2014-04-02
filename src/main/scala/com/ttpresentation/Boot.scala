@@ -1,12 +1,12 @@
-package com.ttpresentation.boot
+package com.ttpresentation
 
 import com.typesafe.scalalogging.slf4j.Logging
 import akka.actor._
 import spray.can.Http
 import akka.io.IO
-import com.ttpresentation.endpoint.{MasterInjector, TaskActor}
+import com.ttpresentation.endpoint.MasterInjector
 import com.typesafe.config.ConfigFactory
-import scala.util.{Success, Properties}
+import scala.util.Properties
 import com.ttpresentation.mongo.ReactiveMongoConnection
 import com.ttpresentation.dao._
 import akka.util.Timeout

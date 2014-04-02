@@ -20,7 +20,7 @@ import org.joda.time.DateTime
 import spray.routing.authentication._
 import scala.Some
 import com.ttpresentation.model.Task
-import com.ttpresentation.auth.{DummyUserPassAuthenticator, FromMongoUserPassAuthenticator}
+import com.ttpresentation.auth.DummyUserPassAuthenticator
 import scala.Some
 import com.ttpresentation.model.Task
 import com.ttpresentation.spraylib.LocalRejectionHandlers

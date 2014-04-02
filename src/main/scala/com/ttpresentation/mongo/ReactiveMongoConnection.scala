@@ -3,12 +3,13 @@ package com.ttpresentation.mongo
 import reactivemongo.api.MongoDriver
 import com.typesafe.config.ConfigFactory
 import akka.actor.ActorSystem
-import com.ttpresentation.boot.MyActorSystem
 import scala.util.Properties
 import scala.concurrent.duration._
 import scala.concurrent.Await
 import com.typesafe.scalalogging.slf4j.Logging
 import reactivemongo.api.indexes.{IndexType, Index}
+import reactivemongo.api.collections.default.BSONCollection
+import com.ttpresentation.MyActorSystem
 
 
 /**
@@ -51,6 +52,6 @@ trait ReactiveMongoConnection extends MyActorSystem with Logging {
 
   // Gets a reference to the collection "acoll"
   // By default, you get a BSONCollection.
-  val taskCollection = db(config.getString("ttpresentation.task.collection"))
-  val userCollection = db(config.getString("ttpresentation.user.collection"))
+  val taskCollection: BSONCollection = db(config.getString("ttpresentation.task.collection"))
+  val userCollection: BSONCollection = db(config.getString("ttpresentation.user.collection"))
 }

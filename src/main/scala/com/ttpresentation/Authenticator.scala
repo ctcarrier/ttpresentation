@@ -1,7 +1,7 @@
-package com.ttpresentation.auth
+package com.ttpresentation
 
 import com.typesafe.config.ConfigFactory
-import scala.concurrent.{Future, ExecutionContext}
+import scala.concurrent.Future
 import spray.routing.authentication._
 import scala.Some
 import org.mindrot.jbcrypt.BCrypt
@@ -19,21 +19,10 @@ object FromMongoUserPassAuthenticator extends Logging with ReactiveMongoConnecti
   def apply(): UserPassAuthenticator[User] = {
     new UserPassAuthenticator[User] {
       def apply(userPass: Option[UserPass]) = {
-
         userPass match {
           case Some(up) => {
             userCollection.find(BSONDocument("email" -> up.user)).one[User].map(y => {
-              y match {
-                case Some(yu) => {
-                  if (BCrypt.checkpw(up.pass, yu.password)) {
-                    Some(yu)
-                  }
-                  else {
-                    None
-                  }
-                }
-                case None => None
-              }
+              y.filter(x => BCrypt.checkpw(up.pass, x.password))
             })
           }
           case None => Future.successful(None)

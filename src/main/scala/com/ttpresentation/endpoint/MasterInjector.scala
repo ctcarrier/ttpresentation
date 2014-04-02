@@ -15,8 +15,6 @@ import spray.routing.directives.LoggingMagnet
 
 trait MasterInjector extends Actor with TaskEndpoint with UserEndpoint with LocalJacksonFormats with LocalRejectionHandlers {
 
-  val taskDao: TaskDao
-
   def actorRefFactory = context
 
   def receive = runRoute(logRequestResponse(LoggingMagnet.forRequestResponseFromMarkerAndLevel("static" -> akka.event.Logging.InfoLevel)){taskRoute ~ userRoute})
