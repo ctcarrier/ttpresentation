@@ -22,28 +22,28 @@ import org.joda.time.DateTime
  * Created by ccarrier for bl-rest.
  * at 10:00 PM on 12/14/13
  */
-trait VaultDao {
+trait TaskDao {
 
-  def get(key: BSONObjectID, user: User): Future[Option[Vault]]
-  def save(v: Vault, user: User): Future[Option[Vault]]
-  def getAll(user: User): Future[List[Vault]]
+  def get(key: BSONObjectID, user: User): Future[Option[Task]]
+  def save(v: Task, user: User): Future[Option[Task]]
+  def getAll(user: User): Future[List[Task]]
 
 }
 
-class VaultReactiveDao(db: DB, collection: BSONCollection, system: ActorSystem) extends VaultDao with Logging {
+class TaskReactiveDao(db: DB, collection: BSONCollection, system: ActorSystem) extends TaskDao with Logging {
 
   implicit val context = system.dispatcher
 
-  def get(key: BSONObjectID, user: User): Future[Option[Vault]] = {
-    collection.find(BSONDocument("_id" -> key)).one[Vault]
+  def get(key: BSONObjectID, user: User): Future[Option[Task]] = {
+    collection.find(BSONDocument("_id" -> key)).one[Task]
   }
 
-  def getAll(user: User): Future[List[Vault]] = {
+  def getAll(user: User): Future[List[Task]] = {
     val query = BSONDocument("_id" -> BSONDocument("$exists" -> true), "userId" -> user._id.get)
-    collection.find(query).cursor[Vault].collect[List]()
+    collection.find(query).cursor[Task].collect[List]()
   }
 
-  def save(v: Vault, user: User): Future[Option[Vault]] = {
+  def save(v: Task, user: User): Future[Option[Task]] = {
     val toSave = v.copy(_id = Some(BSONObjectID.generate))
     collection.save(toSave).map(x => {
       Some(toSave)

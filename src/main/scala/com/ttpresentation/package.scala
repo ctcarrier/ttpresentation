@@ -20,5 +20,5 @@ package object ttpresentation {
   }
 
   implicit val userHandler = Macros.handler[User]
-  implicit val vaultHandler = Macros.handler[Vault]
+  implicit val taskHandler = Macros.handler[Task]
 }

@@ -4,7 +4,7 @@ import com.typesafe.scalalogging.slf4j.Logging
 import akka.actor._
 import spray.can.Http
 import akka.io.IO
-import com.ttpresentation.endpoint.{MasterInjector, VaultActor}
+import com.ttpresentation.endpoint.{MasterInjector, TaskActor}
 import com.typesafe.config.ConfigFactory
 import scala.util.{Success, Properties}
 import com.ttpresentation.mongo.ReactiveMongoConnection
@@ -23,21 +23,23 @@ trait MyActorSystem {
   implicit val system = ActorSystem()
 }
 
-class DependencyInjector(dao: VaultDao)
+class DependencyInjector(dao: TaskDao, _userDao: UserDao)
   extends IndirectActorProducer {
 
   override def actorClass = classOf[Actor]
   override def produce = new MasterInjector{
-    val vaultDao = dao
+    val taskDao = dao
+    val userDao = _userDao
   }
 }
 
-trait VaultDaos { this: ReactiveMongoConnection =>
+trait AppDaos { this: ReactiveMongoConnection =>
 
-  val vaultDao: VaultDao = new VaultReactiveDao(db, vaultCollection, system)
+  val taskDao: TaskDao = new TaskReactiveDao(db, taskCollection, system)
+  val userDao: UserDao = new UserReactiveDao(db, userCollection, system)
 }
 
-object Boot extends App with Logging with ReactiveMongoConnection with MyActorSystem with VaultDaos {
+object Boot extends App with Logging with ReactiveMongoConnection with MyActorSystem with AppDaos {
 
   private val config = ConfigFactory.load()
 
@@ -45,7 +47,7 @@ object Boot extends App with Logging with ReactiveMongoConnection with MyActorSy
   val port = Properties.envOrElse("PORT", "8080").toInt
 
   // the handler actor replies to incoming HttpRequests
-  val handler = system.actorOf(Props(classOf[DependencyInjector], vaultDao), name = "endpoints")
+  val handler = system.actorOf(Props(classOf[DependencyInjector], taskDao, userDao), name = "endpoints")
 
   implicit val timeout = Timeout(5.seconds)
   IO(Http) ? Http.Bind(handler, interface = host, port = port)

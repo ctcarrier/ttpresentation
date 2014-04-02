@@ -13,11 +13,12 @@ import org.joda.time.format.ISODateTimeFormat
  */
 trait LocalJacksonFormats {
 
-  implicit val json4sJacksonFormats = Serialization.formats(ShortTypeHints(List(classOf[BSONDocument]))) + new IntervalSerializer + new DateTimeSerializer
+  implicit val json4sJacksonFormats = Serialization.formats(ShortTypeHints(List(classOf[BSONDocument]))) +
+    new BSONObjectIDSerializer + new DateTimeSerializer
 
 }
 
-class IntervalSerializer   extends CustomSerializer[BSONObjectID](format => (
+class BSONObjectIDSerializer   extends CustomSerializer[BSONObjectID](format => (
   {
     case JString(id) =>
       BSONObjectID(id)

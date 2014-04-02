@@ -51,6 +51,6 @@ trait ReactiveMongoConnection extends MyActorSystem with Logging {
 
   // Gets a reference to the collection "acoll"
   // By default, you get a BSONCollection.
-  val vaultCollection = db(config.getString("ttpresentation.vault.collection"))
+  val taskCollection = db(config.getString("ttpresentation.task.collection"))
   val userCollection = db(config.getString("ttpresentation.user.collection"))
 }

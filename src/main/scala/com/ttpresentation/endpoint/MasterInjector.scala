@@ -2,7 +2,7 @@ package com.ttpresentation.endpoint
 
 import akka.actor.Actor
 import org.json4s.DefaultFormats
-import com.ttpresentation.dao.VaultDao
+import com.ttpresentation.dao.TaskDao
 import com.ttpresentation.json.LocalJacksonFormats
 import com.ttpresentation.spraylib.LocalRejectionHandlers
 import spray.routing.directives.LoggingMagnet
@@ -13,11 +13,11 @@ import spray.routing.directives.LoggingMagnet
  */
 
 
-trait MasterInjector extends Actor with VaultEndpoint with LocalJacksonFormats with LocalRejectionHandlers {
+trait MasterInjector extends Actor with TaskEndpoint with UserEndpoint with LocalJacksonFormats with LocalRejectionHandlers {
 
-  val vaultDao: VaultDao
+  val taskDao: TaskDao
 
   def actorRefFactory = context
 
-  def receive = runRoute(logRequestResponse(LoggingMagnet.forRequestResponseFromMarkerAndLevel("static" -> akka.event.Logging.InfoLevel)){vaultRoute})
+  def receive = runRoute(logRequestResponse(LoggingMagnet.forRequestResponseFromMarkerAndLevel("static" -> akka.event.Logging.InfoLevel)){taskRoute ~ userRoute})
 }
