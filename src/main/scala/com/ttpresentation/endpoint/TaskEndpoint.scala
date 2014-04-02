@@ -55,11 +55,10 @@ trait TaskEndpoint extends HttpService with Logging with Json4sJacksonSupport wi
             }
         } ~
         postTask { task =>
-            complete {
-              hashActor ! Message("Some String")
-              taskDao.save(task, user)
-            }
-
+          complete {
+            hashActor ! Message(task.name)
+            taskDao.save(task, user)
+          }
         } ~
         indirectGet {
           complete {
@@ -67,6 +66,4 @@ trait TaskEndpoint extends HttpService with Logging with Json4sJacksonSupport wi
           }
         }
     }
-
-
 }

@@ -42,49 +42,74 @@ class TaskEndpointSpec extends Specification with Specs2RouteTest with TaskEndpo
   "The service" should {
 
     "return a Task for direct GET requests" in {
-      Get("/tasks/%s".format(TestState.DUMMY_TASK_1._id.get.stringify)) ~> addHeader(Authorization(BasicHttpCredentials("test@example.com", "test"))) ~> taskRoute ~> check {
-        responseAs[Task] == TestState.DUMMY_TASK_1
-        contentType === `application/json`
-        status === OK
+      Get("/tasks/%s".format(TestState.DUMMY_TASK_1._id.get.stringify)) ~>
+        addHeader(Authorization(BasicHttpCredentials("test@example.com", "test"))) ~>
+        taskRoute ~>
+        check {
+          responseAs[Task] == TestState.DUMMY_TASK_1
+          contentType === `application/json`
+          status === OK
       }
     }
     "return a 404 for direct GET request with a bad ID" in {
-      Get("/tasks/%s".format(BSONObjectID.generate.stringify)) ~> addHeader(Authorization(BasicHttpCredentials("test@example.com", "test"))) ~> taskRoute ~> check {
-        status === NotFound
+      Get("/tasks/%s".format(BSONObjectID.generate.stringify)) ~>
+        addHeader(Authorization(BasicHttpCredentials("test@example.com", "test"))) ~>
+        taskRoute ~>
+        check {
+          status === NotFound
       }
     }
     "return a 404 for direct GET request with a malformed objectID" in {
-      Get("/tasks/%s".format("abc")) ~> addHeader(Authorization(BasicHttpCredentials("test@example.com", "test"))) ~> taskRoute ~> check {
-        status === NotFound
+      Get("/tasks/%s".format("abc")) ~>
+        addHeader(Authorization(BasicHttpCredentials("test@example.com", "test"))) ~>
+        taskRoute ~>
+        check {
+          status === NotFound
       }
     }
     "return a 403 for direct GET Task with bad auth credentials" in {
-      Get("/tasks/%s".format("abc")) ~> addHeader(Authorization(BasicHttpCredentials("test@example.com", "NO"))) ~> sealRoute(taskRoute) ~> check {
-        status === Forbidden
+      Get("/tasks/%s".format("abc")) ~>
+        addHeader(Authorization(BasicHttpCredentials("test@example.com", "NO"))) ~>
+        sealRoute(taskRoute) ~>
+        check {
+          status === Forbidden
       }
     }
     "return a list of Tasks for indirect GET requests" in {
-      Get("/tasks") ~> addHeader(Authorization(BasicHttpCredentials("test@example.com", "test"))) ~> taskRoute ~> check {
-        responseAs[List[Task]] == List(TestState.DUMMY_TASK_1, TestState.DUMMY_TASK_2)
-        contentType === `application/json`
-        status === OK
+      Get("/tasks") ~>
+        addHeader(Authorization(BasicHttpCredentials("test@example.com", "test"))) ~>
+        taskRoute ~>
+        check {
+          responseAs[List[Task]] == List(TestState.DUMMY_TASK_1, TestState.DUMMY_TASK_2)
+          contentType === `application/json`
+          status === OK
       }
     }
     "return a 403 for indirect GET Task with bad auth credentials" in {
-      Get("/tasks/%s".format("abc")) ~> addHeader(Authorization(BasicHttpCredentials("test@example.com", "NO"))) ~> sealRoute(taskRoute) ~> check {
-        status === Forbidden
+      Get("/tasks/%s".format("abc")) ~>
+        addHeader(Authorization(BasicHttpCredentials("test@example.com", "NO"))) ~>
+        sealRoute(taskRoute) ~>
+        check {
+          status === Forbidden
       }
     }
     "return a Task after a POST" in {
-      Post("/tasks", TestState.DUMMY_TASK_1) ~> addHeader("Content-Type", "application/json") ~> addHeader(Authorization(BasicHttpCredentials("test@example.com", "test"))) ~> taskRoute ~> check {
-        responseAs[Task] == TestState.DUMMY_TASK_1
-        contentType === `application/json`
-        status === Created
+      Post("/tasks", TestState.DUMMY_TASK_1) ~>
+        addHeader("Content-Type", "application/json") ~>
+        addHeader(Authorization(BasicHttpCredentials("test@example.com", "test"))) ~>
+        taskRoute ~>
+        check {
+          responseAs[Task] == TestState.DUMMY_TASK_1
+          contentType === `application/json`
+          status === Created
       }
     }
     "return a 403 for POST task with bad auth credentials" in {
-      Get("/tasks/%s".format("abc")) ~> addHeader(Authorization(BasicHttpCredentials("test@example.com", "NO"))) ~> sealRoute(taskRoute) ~> check {
-        status === Forbidden
+      Get("/tasks/%s".format("abc")) ~>
+        addHeader(Authorization(BasicHttpCredentials("test@example.com", "NO"))) ~>
+        sealRoute(taskRoute) ~>
+        check {
+          status === Forbidden
       }
     }
   }

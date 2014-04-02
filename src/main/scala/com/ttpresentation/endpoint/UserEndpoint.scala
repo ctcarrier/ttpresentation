@@ -36,18 +36,17 @@ trait UserEndpoint extends HttpService with Logging with Json4sJacksonSupport wi
   def userRoute =
     respondWithMediaType(`application/json`) {
       pathPrefix("users") {
-          directGetUser { user =>
-            complete {
-              user
-            }
+        directGetUser { user =>
+          complete {
+            user
+          }
         } ~
         postUser  { user =>
-            complete {
-              userDao.save(user)
-            }
+          complete {
+            userDao.save(user)
           }
+        }
       }
     }
-
 }
 
