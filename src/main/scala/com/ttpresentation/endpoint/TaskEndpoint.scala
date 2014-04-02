@@ -8,7 +8,7 @@ import com.typesafe.scalalogging.slf4j.Logging
 
 import spray.httpx.Json4sJacksonSupport
 
-import akka.actor.Actor
+import akka.actor.{Props, Actor}
 
 import org.json4s.DefaultFormats
 import scala.concurrent.{Future, ExecutionContext}
@@ -18,6 +18,7 @@ import com.ttpresentation.model.{User, Task}
 import com.ttpresentation.mongo.MongoAuthSupport
 
 import spray.routing._
+import com.ttpresentation.actor.{Message, HashActor}
 
 /**
  * Created by ccarrier for bl-rest.
@@ -44,6 +45,8 @@ trait TaskEndpoint extends HttpService with Logging with Json4sJacksonSupport wi
   val postTask = path("tasks") & post & respondWithStatus(Created) & entity(as[Task])
   val indirectGet = path("tasks") & get
 
+  val hashActor = actorRefFactory.actorOf(Props[HashActor])
+
   def taskRoute =
     startRoute { user =>
         directGetTask { key =>
@@ -53,6 +56,7 @@ trait TaskEndpoint extends HttpService with Logging with Json4sJacksonSupport wi
         } ~
         postTask { task =>
             complete {
+              hashActor ! Message("Some String")
               taskDao.save(task, user)
             }
 
