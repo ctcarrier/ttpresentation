@@ -28,8 +28,9 @@ class UserReactiveDao(db: DB, collection: BSONCollection, system: ActorSystem) e
   }
 
   def save(v: User): Future[Option[User]] = {
-    val toSave = v.copy(_id = Some(BSONObjectID.generate), password=BCrypt.hashpw(v.password, BCrypt.gensalt(12)))
-    collection.save(toSave).map(x => {Some(toSave)})
-
+    for {
+      toSave <- Future{v.copy(_id = Some(BSONObjectID.generate), password=BCrypt.hashpw(v.password, BCrypt.gensalt(10)))}
+      saved <- collection.save(toSave)
+    } yield Some(toSave)
   }
 }

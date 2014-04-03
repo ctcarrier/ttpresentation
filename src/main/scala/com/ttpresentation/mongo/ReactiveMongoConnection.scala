@@ -5,12 +5,12 @@ import com.typesafe.config.ConfigFactory
 import akka.actor.ActorSystem
 import scala.util.Properties
 import scala.concurrent.duration._
-import scala.concurrent.Await
+import scala.concurrent.{ExecutionContext, Await}
 import com.typesafe.scalalogging.slf4j.Logging
 import reactivemongo.api.indexes.{IndexType, Index}
 import reactivemongo.api.collections.default.BSONCollection
 import com.ttpresentation.MyActorSystem
-
+import ExecutionContext.Implicits.global
 
 /**
  * Created by ccarrier for bl-rest.
@@ -19,7 +19,6 @@ import com.ttpresentation.MyActorSystem
 trait ReactiveMongoConnection extends MyActorSystem with Logging {
 
   private val config = ConfigFactory.load()
-  implicit val context = system.dispatcher
   val driver = new MongoDriver
 
   val pattern = "^mongodb:\\/\\/([\\w]*):([\\w]*)@([\\w\\.-]+):([\\d]+)\\/([\\w]+)".r

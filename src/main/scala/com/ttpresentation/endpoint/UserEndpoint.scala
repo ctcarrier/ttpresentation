@@ -5,6 +5,7 @@ import com.typesafe.scalalogging.slf4j.Logging
 import spray.httpx.Json4sJacksonSupport
 import scala.concurrent.ExecutionContext
 import spray.http.MediaTypes._
+import spray.http.StatusCodes._
 import akka.actor.Actor
 import com.ttpresentation.dao.UserDao
 import com.ttpresentation.spraylib.LocalPathMatchers
@@ -29,7 +30,7 @@ trait UserEndpoint extends HttpService with Logging with Json4sJacksonSupport wi
   import ExecutionContext.Implicits.global
 
   val directGetUser = get & authenticate(httpMongo())
-  val postUser = post & entity(as[User])
+  val postUser = post & respondWithStatus(Created) & entity(as[User])
 
   val userDao: UserDao
 
@@ -42,9 +43,9 @@ trait UserEndpoint extends HttpService with Logging with Json4sJacksonSupport wi
           }
         } ~
         postUser  { user =>
-          complete {
+          detach() {complete {
             userDao.save(user)
-          }
+          }}
         }
       }
     }

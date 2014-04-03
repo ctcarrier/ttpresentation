@@ -17,5 +17,5 @@ trait MasterInjector extends Actor with TaskEndpoint with UserEndpoint with Loca
 
   def actorRefFactory = context
 
-  def receive = runRoute(logRequestResponse(LoggingMagnet.forRequestResponseFromMarkerAndLevel("static" -> akka.event.Logging.InfoLevel)){taskRoute ~ userRoute})
+  def receive = runRoute(taskRoute ~ userRoute)
 }

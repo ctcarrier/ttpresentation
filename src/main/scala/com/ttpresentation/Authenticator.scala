@@ -1,7 +1,7 @@
 package com.ttpresentation
 
 import com.typesafe.config.ConfigFactory
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import spray.routing.authentication._
 import scala.Some
 import org.mindrot.jbcrypt.BCrypt
@@ -9,6 +9,7 @@ import com.typesafe.scalalogging.slf4j.Logging
 import com.ttpresentation.model.User
 import com.ttpresentation.mongo.ReactiveMongoConnection
 import reactivemongo.bson._
+import ExecutionContext.Implicits.global
 
 /**
  * Created by ctcarrier on 3/3/14.
